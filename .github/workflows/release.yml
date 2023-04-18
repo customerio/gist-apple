@@ -1,0 +1,78 @@
+name: Release Gist Apple
+run-name: Release gist-apple ${{ github.event.inputs.release_version }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_version:
+        description: 'Release version'
+        required: true
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      GIST_COCOAPODS_TRUNK_TOKEN: ${{ secrets.GIST_COCOAPODS_TRUNK_TOKEN }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: 'develop'
+          fetch-depth: 0
+      - name: Update podspec
+        shell: bash
+        run: |
+          RELEASE_VERSION="${{ github.event.inputs.release_version }}"
+          echo "RELEASE_VERSION=$RELEASE_VERSION" >> $GITHUB_ENV
+          echo "RELEASE_VERSION=$RELEASE_VERSION"
+
+          sed -i -E "s/s\.version \= '.*'/s\.version = '$RELEASE_VERSION'/" Gist.podspec
+          rm Gist.podspec-E || true
+      - name: Merge to develop
+        shell: bash
+        run: |
+          git config user.name "ami-ci"
+          git config user.email "<>"
+          git checkout develop
+          git add .
+          set +e  # Grep succeeds with nonzero exit codes to show results.
+          git status | grep modified
+          if [ $? -eq 0 ]
+          then
+              set -e
+              git commit -am "New version of gist-web"
+              git push
+          else
+              set -e
+              echo "No changes since last run"
+          fi
+      - name: Release to master
+        shell: bash
+        run: |
+          echo "Release $RELEASE_VERSION"
+          git remote update
+          git checkout release/$RELEASE_VERSION 2>/dev/null || git checkout -b release/$RELEASE_VERSION origin/develop
+          git push origin release/$RELEASE_VERSION
+          git checkout master
+          git branch
+          git pull origin master
+          git merge -Xours release/$RELEASE_VERSION
+          git tag -a $RELEASE_VERSION -m "Create release tag $RELEASE_VERSION"
+          git tag
+          git push origin master
+          git push origin --tags
+          git checkout develop
+          git branch
+          git merge -Xours release/$RELEASE_VERSION
+          git push origin develop
+          git branch -D release/$RELEASE_VERSION
+          git branch
+          git push origin :release/$RELEASE_VERSION
+          git branch -avv
+          echo "Release complete"
+          echo "final tags:"
+          git tag --sort='creatordate' --merged master
+      - name: Publish to CocoaPod register
+        env:
+          COCOAPODS_TRUNK_TOKEN: ${{ env.GIST_COCOAPODS_TRUNK_TOKEN }}
+        run: |
+          pod trunk push Gist.podspec
