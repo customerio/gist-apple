@@ -49,25 +49,13 @@ jobs:
         shell: bash
         run: |
           echo "Release $RELEASE_VERSION"
-          git remote update
-          git checkout release/$RELEASE_VERSION 2>/dev/null || git checkout -b release/$RELEASE_VERSION origin/develop
-          git push origin release/$RELEASE_VERSION
+          git merge origin/master
           git checkout master
-          git branch
-          git pull origin master
-          git merge -Xours release/$RELEASE_VERSION
+          git merge develop
           git tag -a $RELEASE_VERSION -m "Create release tag $RELEASE_VERSION"
           git tag
           git push origin master
           git push origin --tags
-          git checkout develop
-          git branch
-          git merge -Xours release/$RELEASE_VERSION
-          git push origin develop
-          git branch -D release/$RELEASE_VERSION
-          git branch
-          git push origin :release/$RELEASE_VERSION
-          git branch -avv
           echo "Release complete"
           echo "final tags:"
           git tag --sort='creatordate' --merged master
