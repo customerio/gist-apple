@@ -73,18 +73,21 @@ public class Gist: GistDelegate {
         messageManager(instanceId: instanceId)?.dismissMessage(completionHandler: completionHandler)
     }
 
+    public func removePersistentMessage(message: Message) {
+        if (message.gistProperties.persistent == true) {
+            Logger.instance.debug(message: "Persistent message dismissed, logging view")
+            logView(message: message)
+        }
+    }
+
     // MARK: Events
 
     public func messageShown(message: Message) {
         Logger.instance.debug(message: "Message with route: \(message.messageId) shown")
-        messageQueueManager.removeMessageFromLocalStore(message: message)
-        let userToken = UserManager().getUserToken()
-        LogManager(siteId: siteId, dataCenter: dataCenter)
-            .logView(message: message, userToken: userToken) { response in
-                if case let .failure(error) = response {
-                    Logger.instance.error(message:
-                        "Failed to log view for message: \(message.messageId) with error: \(error)")
-                }
+        if (message.gistProperties.persistent != true) {
+            logView(message: message)
+        } else {
+            Logger.instance.debug(message: "Persistent message shown, skipping logging view")
         }
         delegate?.messageShown(message: message)
     }
@@ -110,6 +113,16 @@ public class Gist: GistDelegate {
 
     // Message Manager
 
+    private func logView(message: Message) {
+        messageQueueManager.removeMessageFromLocalStore(message: message)
+        let userToken = UserManager().getUserToken()
+        LogManager(siteId: siteId, dataCenter: dataCenter)
+            .logView(message: message, userToken: userToken) { response in
+                if case let .failure(error) = response {
+                    Logger.instance.error(message: "Failed to log view for message: \(message.messageId) with error: \(error)")
+                }
+            }
+    }
     private func createMessageManager(siteId: String, message: Message) -> MessageManager {
         let messageManager = MessageManager(siteId: siteId, message: message)
         messageManager.delegate = self

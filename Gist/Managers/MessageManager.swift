@@ -88,6 +88,7 @@ class MessageManager: EngineWebDelegate {
             case "close":
                 Logger.instance.info(message: "Dismissing from action: \(action)")
                 dismissMessage()
+                delegate?.removePersistentMessage(message: currentMessage)
             case "loadPage":
                 if let page = url.queryParameters?["url"],
                    let pageUrl = URL(string: page),
@@ -99,6 +100,8 @@ class MessageManager: EngineWebDelegate {
                     self.showNewMessage(url: url)
                 } else {
                     dismissMessage {
+                        // BERNARD: not sure about this one
+                        self.delegate?.removePersistentMessage(message: self.currentMessage)
                         self.showNewMessage(url: url)
                     }
                 }
