@@ -2,8 +2,6 @@ import Foundation
 import UIKit
 
 public class Gist: GistDelegate {
-    internal var engineManager: EngineManager!
-    internal var engineConfiguration: EngineConfiguration?
     private var messageQueueManager = MessageQueueManager()
     private var messageManagers: [MessageManager] = []
     public var siteId: String = ""
@@ -22,7 +20,8 @@ public class Gist: GistDelegate {
         self.dataCenter = dataCenter
         Logger.instance.enabled = logging
         messageQueueManager.setup()
-        EngineManager(siteId: siteId, dataCenter: dataCenter).bootstrapEngine()
+        
+        _ = Gist.shared.getMessageView(Message(messageId: ""))
     }
 
     // MARK: User
