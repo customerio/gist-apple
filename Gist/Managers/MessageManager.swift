@@ -22,12 +22,20 @@ class MessageManager: EngineWebDelegate {
         self.siteId = siteId
         self.currentMessage = message
         self.currentRoute = message.messageId
+        
+        var engineConfiguration: EngineConfiguration
+        
+        if let engineConf = Gist.shared.engineConfiguration {
+            engineConfiguration = engineConf
+        } else {
+            engineConfiguration = EngineConfiguration(projectId: "", organizationId: "", configuration: [String: Any]())
+        }
 
         let engineWebConfiguration = EngineWebConfiguration(
-            siteId: self.siteId,
-            messageId: message.messageId,
             instanceId: message.instanceId,
-            endpoint: Settings.Network.gistAPI,
+            endpoint: Settings.Network.engineAPI,
+            messageId: message.messageId,
+            engineConfiguration: engineConfiguration,
             properties: message.toEngineRoute().properties)
 
         engine = EngineWeb(configuration: engineWebConfiguration)
