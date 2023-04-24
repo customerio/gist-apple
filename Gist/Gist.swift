@@ -21,7 +21,7 @@ public class Gist: GistDelegate {
         Logger.instance.enabled = logging
         messageQueueManager.setup()
         
-        // Initialising Gist web with an empty message to fetch all required assets.
+        // Initialising Gist web with an empty message to fetch fonts and other assets.
         _ = Gist.shared.getMessageView(Message(messageId: ""))
     }
 
