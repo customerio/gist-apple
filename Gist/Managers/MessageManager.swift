@@ -71,6 +71,8 @@ class MessageManager: EngineWebDelegate {
 
     func bootstrapped() {
         Logger.instance.debug(message: "Bourbon Engine bootstrapped")
+        
+        // Cleaning after engine web is bootstrapped and all assets downloaded.
         if currentMessage.messageId == "" {
             engine?.cleanEngineWeb()
         }
