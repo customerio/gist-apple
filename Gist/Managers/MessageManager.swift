@@ -71,6 +71,9 @@ class MessageManager: EngineWebDelegate {
 
     func bootstrapped() {
         Logger.instance.debug(message: "Bourbon Engine bootstrapped")
+        if currentMessage.messageId == "" {
+            engine?.cleanEngineWeb()
+        }
     }
 
     func tap(name: String, action: String, system: Bool) {
