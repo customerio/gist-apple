@@ -4,7 +4,6 @@ import UIKit
 public class Gist: GistDelegate {
     private var messageQueueManager = MessageQueueManager()
     private var messageManagers: [MessageManager] = []
-
     public var siteId: String = ""
     public var dataCenter: String = ""
 
@@ -21,6 +20,9 @@ public class Gist: GistDelegate {
         self.dataCenter = dataCenter
         Logger.instance.enabled = logging
         messageQueueManager.setup()
+        
+        // Initialising Gist web with an empty message to fetch fonts and other assets.
+        _ = Gist.shared.getMessageView(Message(messageId: ""))
     }
 
     // MARK: User

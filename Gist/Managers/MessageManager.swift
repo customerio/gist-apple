@@ -24,10 +24,11 @@ class MessageManager: EngineWebDelegate {
         self.currentRoute = message.messageId
 
         let engineWebConfiguration = EngineWebConfiguration(
-            siteId: self.siteId,
-            messageId: message.messageId,
+            siteId: Gist.shared.siteId,
+            dataCenter: Gist.shared.dataCenter,
             instanceId: message.instanceId,
-            endpoint: Settings.Network.gistAPI,
+            endpoint: Settings.Network.engineAPI,
+            messageId: message.messageId,
             properties: message.toEngineRoute().properties)
 
         engine = EngineWeb(configuration: engineWebConfiguration)
@@ -70,6 +71,11 @@ class MessageManager: EngineWebDelegate {
 
     func bootstrapped() {
         Logger.instance.debug(message: "Bourbon Engine bootstrapped")
+        
+        // Cleaning after engine web is bootstrapped and all assets downloaded.
+        if currentMessage.messageId == "" {
+            engine?.cleanEngineWeb()
+        }
     }
 
     func tap(name: String, action: String, system: Bool) {
