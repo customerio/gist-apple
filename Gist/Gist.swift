@@ -70,7 +70,10 @@ public class Gist: GistDelegate {
     }
 
     public func dismissMessage(instanceId: String, completionHandler: (() -> Void)? = nil) {
-        messageManager(instanceId: instanceId)?.dismissMessage(completionHandler: completionHandler)
+        if let messageManager = messageManager(instanceId: instanceId) {
+            messageManager.removePersistentMessage()
+            messageManager.dismissMessage(completionHandler: completionHandler)
+        }
     }
 
     // MARK: Events
@@ -78,7 +81,7 @@ public class Gist: GistDelegate {
     public func messageShown(message: Message) {
         Logger.instance.debug(message: "Message with route: \(message.messageId) shown")
         if (message.gistProperties.persistent != true) {
-            logView(message: message)
+            logMessageView(message: message)
         } else {
             Logger.instance.debug(message: "Persistent message shown, skipping logging view")
         }
@@ -103,10 +106,8 @@ public class Gist: GistDelegate {
     public func embedMessage(message: Message, elementId: String) {
         delegate?.embedMessage(message: message, elementId: elementId)
     }
-
-    // Message Manager
-
-    func logView(message: Message) {
+    
+    func logMessageView(message: Message) {
         messageQueueManager.removeMessageFromLocalStore(message: message)
         let userToken = UserManager().getUserToken()
         LogManager(siteId: siteId, dataCenter: dataCenter)
@@ -116,6 +117,9 @@ public class Gist: GistDelegate {
                 }
             }
     }
+
+    // Message Manager
+    
     private func createMessageManager(siteId: String, message: Message) -> MessageManager {
         let messageManager = MessageManager(siteId: siteId, message: message)
         messageManager.delegate = self

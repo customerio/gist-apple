@@ -72,7 +72,7 @@ class MessageManager: EngineWebDelegate {
     func removePersistentMessage() {
         if (currentMessage.gistProperties.persistent == true) {
             Logger.instance.debug(message: "Persistent message dismissed, logging view")
-            Gist.shared.logView(message: currentMessage)
+            Gist.shared.logMessageView(message: currentMessage)
         }
     }
 
