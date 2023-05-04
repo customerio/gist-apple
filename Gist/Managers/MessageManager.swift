@@ -68,6 +68,13 @@ class MessageManager: EngineWebDelegate {
             }
         }
     }
+    
+    func removePersistentMessage() {
+        if (currentMessage.gistProperties.persistent == true) {
+            Logger.instance.debug(message: "Persistent message dismissed, logging view")
+            Gist.shared.logView(message: currentMessage)
+        }
+    }
 
     func bootstrapped() {
         Logger.instance.debug(message: "Bourbon Engine bootstrapped")
@@ -87,8 +94,8 @@ class MessageManager: EngineWebDelegate {
             switch url.host {
             case "close":
                 Logger.instance.info(message: "Dismissing from action: \(action)")
+                self.removePersistentMessage()
                 dismissMessage()
-                delegate?.removePersistentMessage(message: currentMessage)
             case "loadPage":
                 if let page = url.queryParameters?["url"],
                    let pageUrl = URL(string: page),
@@ -100,8 +107,6 @@ class MessageManager: EngineWebDelegate {
                     self.showNewMessage(url: url)
                 } else {
                     dismissMessage {
-                        // BERNARD: not sure about this one
-                        self.delegate?.removePersistentMessage(message: self.currentMessage)
                         self.showNewMessage(url: url)
                     }
                 }

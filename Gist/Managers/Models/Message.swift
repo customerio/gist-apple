@@ -43,20 +43,21 @@ public class Message {
             self.properties = properties
             if let gist = self.properties["gist"] as? [String: Any] {
                 var messagePosition = MessagePosition.center
-                if let position = gist["position"], let positionValue = MessagePosition.init(rawValue: position as! String) {
+                if let position = gist["position"] as? String,
+                   let positionValue = MessagePosition.init(rawValue: position) {
                     messagePosition = positionValue
                 }
                 var routeRule: String? = nil
-                if let routeRuleApple = gist["routeRuleApple"] {
-                    routeRule = routeRuleApple as? String
+                if let routeRuleApple = gist["routeRuleApple"] as? String {
+                    routeRule = routeRuleApple
                 }
                 var elementId: String? = nil
-                if let elementIdValue = gist["elementId"] {
-                    elementId = elementIdValue as? String
+                if let elementIdValue = gist["elementId"] as? String {
+                    elementId = elementIdValue
                 }
                 var campaignId: String? = nil
-                if let campaignIdValue = gist["campaignId"] {
-                    campaignId = campaignIdValue as? String
+                if let campaignIdValue = gist["campaignId"] as? String {
+                    campaignId = campaignIdValue
                 }
                 var persistent = false
                 if let persistentValue = gist["persistent"] as? Bool {

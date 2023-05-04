@@ -73,13 +73,6 @@ public class Gist: GistDelegate {
         messageManager(instanceId: instanceId)?.dismissMessage(completionHandler: completionHandler)
     }
 
-    public func removePersistentMessage(message: Message) {
-        if (message.gistProperties.persistent == true) {
-            Logger.instance.debug(message: "Persistent message dismissed, logging view")
-            logView(message: message)
-        }
-    }
-
     // MARK: Events
 
     public func messageShown(message: Message) {
@@ -113,7 +106,7 @@ public class Gist: GistDelegate {
 
     // Message Manager
 
-    private func logView(message: Message) {
+    func logView(message: Message) {
         messageQueueManager.removeMessageFromLocalStore(message: message)
         let userToken = UserManager().getUserToken()
         LogManager(siteId: siteId, dataCenter: dataCenter)
