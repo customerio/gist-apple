@@ -15,6 +15,7 @@ public protocol EngineWebDelegate: AnyObject {
 public class EngineWeb: NSObject {
     private var _currentRoute = ""
     private var _timeoutTimer: Timer?
+    private var _elapsedTimer = ElapsedTimer()
 
     weak public var delegate: EngineWebDelegate?
     var webView = WKWebView()
@@ -35,6 +36,8 @@ public class EngineWeb: NSObject {
     init(configuration: EngineWebConfiguration) {
         super.init()
 
+        _elapsedTimer.start(title: "Engine render for message: \(configuration.messageId)")
+        
         webView.translatesAutoresizingMaskIntoConstraints = false
         webView.navigationDelegate = self
         webView.isOpaque = false
@@ -100,11 +103,13 @@ extension EngineWeb: WKScriptMessageHandler {
             _timeoutTimer?.invalidate()
             delegate?.bootstrapped()
         case .routeLoaded:
+            _elapsedTimer.end()
             if let route = EngineEventHandler.getRouteLoadedProperties(properties: eventProperties) {
                 delegate?.routeLoaded(route: route)
             }
         case .routeChanged:
             if let route = EngineEventHandler.getRouteChangedProperties(properties: eventProperties) {
+                _elapsedTimer.start(title: "Engine render for message: \(route)")
                 delegate?.routeChanged(newRoute: route)
             }
         case .routeError:

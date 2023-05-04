@@ -24,7 +24,7 @@ class GistQueueNetwork {
         urlRequest.addValue(siteId, forHTTPHeaderField: HTTPHeader.siteId.rawValue)
         urlRequest.addValue(dataCenter, forHTTPHeaderField: HTTPHeader.cioDataCenter.rawValue)
         if let userToken = userToken {
-            urlRequest.addValue(userToken, forHTTPHeaderField: HTTPHeader.userToken.rawValue)
+            urlRequest.addValue(Data(userToken.utf8).base64EncodedString(), forHTTPHeaderField: HTTPHeader.userToken.rawValue)
         }
         urlRequest.addValue(ContentTypes.json.rawValue, forHTTPHeaderField: HTTPHeader.contentType.rawValue)
 
