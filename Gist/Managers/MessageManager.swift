@@ -117,12 +117,8 @@ class MessageManager: EngineWebDelegate {
                 if let url = URL(string: action), UIApplication.shared.canOpenURL(url) {
                     UIApplication.shared.open(url) { handled in
                         if handled {
-                            if let persistent = self.currentMessage.gistProperties.persistent, persistent {
-                                Logger.instance.info(message: "Message is persistent, not dismissing.")
-                            } else {
-                                Logger.instance.info(message: "Dismissing from system action: \(action)")
-                                self.dismissMessage()
-                            }
+                            Logger.instance.info(message: "Dismissing from system action: \(action)")
+                            self.dismissMessage()
                         } else {
                             Logger.instance.info(message: "System action not handled")
                         }
