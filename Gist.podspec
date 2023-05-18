@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name = 'Gist'
-  s.version = '3.2.0'
+  s.version = '3.2.1'
   s.summary = 'Gist'
   s.description = 'Gist enables you to create embeddable experiences that range from simple welcome messages to complex multi-step flows.'
   s.homepage = 'https://gist.build'
