@@ -69,10 +69,12 @@ public class Gist: GistDelegate {
         return messageManager.getMessageView()
     }
 
-    public func dismissMessage(instanceId: String, completionHandler: (() -> Void)? = nil) {
-        if let messageManager = messageManager(instanceId: instanceId) {
+    public func dismissMessage(instanceId: String? = nil, completionHandler: (() -> Void)? = nil) {
+        if let id = instanceId, let messageManager = messageManager(instanceId: id) {
             messageManager.removePersistentMessage()
             messageManager.dismissMessage(completionHandler: completionHandler)
+        } else {
+            getModalMessageManager()?.dismissMessage(completionHandler: completionHandler)
         }
     }
 

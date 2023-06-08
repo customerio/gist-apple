@@ -84,12 +84,12 @@ class MessageManager: EngineWebDelegate {
             engine?.cleanEngineWeb()
         }
     }
-
+    
     func tap(name: String, action: String, system: Bool) {
         Logger.instance.info(message: "Action triggered: \(action) with name: \(name)")
         delegate?.action(message: currentMessage, currentRoute: self.currentRoute, action: action, name: name)
         gistView.delegate?.action(message: currentMessage, currentRoute: self.currentRoute, action: action, name: name)
-
+        
         if let url = URL(string: action), url.scheme == "gist" {
             switch url.host {
             case "close":
@@ -115,18 +115,74 @@ class MessageManager: EngineWebDelegate {
         } else {
             if system {
                 if let url = URL(string: action), UIApplication.shared.canOpenURL(url) {
-                    UIApplication.shared.open(url) { handled in
-                        if handled {
-                            Logger.instance.info(message: "Dismissing from system action: \(action)")
-                            self.dismissMessage()
-                        } else {
-                            Logger.instance.info(message: "System action not handled")
+                    /*
+                     There are 2 types of deep links:
+                     1. Universal Links which give URL format of a webpage using `http://` or `https://`
+                     2. App scheme which give URL format using a prototol other then `http://` or `https://`.
+
+                     First, try to open the link inside of the host app. This is to keep compatability with Universal Links.
+                     Learn more of edge case: https://github.com/customerio/customerio-ios/issues/262
+
+                     Fallback to opening the URL through a sytem call if:
+                     1. deep link is an app scheme URL
+                     2. Customer has not implemented the correct function in their host app to handle universal link:
+                     ```
+                     func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool
+                     ```
+                     3. Customer returned `false` from ^^^ function.
+                     */
+                    let handledByUserActivity = continueNSUserActivity(webpageURL: url)
+                    
+                    if !handledByUserActivity {
+                        // If `continueNSUserActivity` could not handle the URL, try opening it directly.
+                        UIApplication.shared.open(url) { handled in
+                            if handled {
+                                Logger.instance.info(message: "Dismissing from system action: \(action)")
+                                self.dismissMessage()
+                            } else {
+                                Logger.instance.info(message: "System action not handled")
+                            }
                         }
+                    } else {
+                        Logger.instance.info(message: "Handled by NSUserActivity")
+                        self.dismissMessage()
                     }
                 }
             }
+            
         }
     }
+    
+    // Check if
+    func continueNSUserActivity(webpageURL: URL) -> Bool {
+        guard #available(iOS 10.0, *) else {
+            return false
+        }
+        guard isLinkValidNSUserActivityLink(webpageURL) else {
+            return false
+        }
+        
+        let openLinkInHostAppActivity = NSUserActivity(activityType: NSUserActivityTypeBrowsingWeb)
+        openLinkInHostAppActivity.webpageURL = webpageURL
+        
+        let didHostAppHandleLink = UIApplication.shared.delegate?.application?(UIApplication.shared, continue: openLinkInHostAppActivity, restorationHandler: { _ in }) ?? false
+
+        return didHostAppHandleLink
+    }
+        
+        
+    // The NSUserActivity.webpageURL property permits only specific URL schemes. This function exists to validate the scheme and prevent potential exceptions due to incompatible URL formats.
+    func isLinkValidNSUserActivityLink(_ url: URL) -> Bool {
+        guard let schemeOfUrl = url.scheme else {
+            return false
+        }
+        
+        // Constants to hold allowed URL schemes
+        let allowedSchemes = ["http", "https"]
+
+        return allowedSchemes.contains(schemeOfUrl)
+    }
+
 
     func routeChanged(newRoute: String) {
         Logger.instance.info(message: "Message route changed to: \(newRoute)")
