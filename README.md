@@ -1,2 +1,3 @@
 # Gist for iOS & iPadOS
-Gist gives you access to a library of ready built micro-experiences that can be easily dropped into your application without writing a line of code.
+
+This repository has been archived. If you're looking to implement in-app messaging in your iOS & iPadOS app, please refer to our [docs](https://customer.io/docs/journeys/in-app-getting-started/).
